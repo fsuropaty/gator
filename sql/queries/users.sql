@@ -14,5 +14,5 @@ SELECT * FROM users WHERE name = $1;
 -- name: DelUsersTable :exec
 DELETE FROM users;
 
--- name: Users :many
+-- name: GetUsers :many
 SELECT id, name FROM users ORDER BY name;

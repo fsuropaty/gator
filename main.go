@@ -16,9 +16,12 @@ type state struct {
 }
 
 func main() {
-	var s state
-
 	dbURL := "postgres://postgres:postgres@localhost:5432/gator"
+
+	cfg, err := config.Read()
+	if err != nil {
+		log.Fatal("Error reading config: ", err)
+	}
 
 	db, err := sql.Open("postgres", dbURL)
 	err = db.Ping()
@@ -27,14 +30,11 @@ func main() {
 	}
 
 	dbQueries := database.New(db)
-	s.db = dbQueries
 
-	conf, err := config.Read()
-	if err != nil {
-		log.Fatal("Error reading config: ", err)
+	programState := state{
+		db:  dbQueries,
+		cfg: &cfg,
 	}
-
-	s.cfg = &conf
 
 	cmds := &commands{
 		handlers: make(map[string]func(*state, command) error),
@@ -46,15 +46,14 @@ func main() {
 	cmds.register("users", handlerUsers)
 
 	if len(os.Args) < 2 {
-		log.Fatal("Not enough arguments provided")
+		log.Fatal("Usage: cli <command> [args...]")
+		return
 	}
 
-	cmd := command{
-		name: os.Args[1],
-		args: os.Args[2:],
-	}
+	cmdName := os.Args[1]
+	cmdArgs := os.Args[2:]
 
-	err = cmds.run(&s, cmd)
+	err = cmds.run(&programState, command{Name: cmdName, Args: cmdArgs})
 	if err != nil {
 		log.Fatal(err)
 	}

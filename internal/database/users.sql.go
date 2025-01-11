@@ -72,24 +72,24 @@ func (q *Queries) GetUser(ctx context.Context, name string) (User, error) {
 	return i, err
 }
 
-const users = `-- name: Users :many
+const getUsers = `-- name: GetUsers :many
 SELECT id, name FROM users ORDER BY name
 `
 
-type UsersRow struct {
+type GetUsersRow struct {
 	ID   uuid.UUID
 	Name string
 }
 
-func (q *Queries) Users(ctx context.Context) ([]UsersRow, error) {
-	rows, err := q.db.QueryContext(ctx, users)
+func (q *Queries) GetUsers(ctx context.Context) ([]GetUsersRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUsers)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []UsersRow
+	var items []GetUsersRow
 	for rows.Next() {
-		var i UsersRow
+		var i GetUsersRow
 		if err := rows.Scan(&i.ID, &i.Name); err != nil {
 			return nil, err
 		}
