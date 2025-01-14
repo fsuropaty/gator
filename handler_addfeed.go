@@ -1,0 +1,43 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/fsuropaty/gator-go/internal/database"
+	"github.com/google/uuid"
+)
+
+func handlerAddFeed(s *state, cmd command) error {
+	if len(cmd.Args) < 2 {
+		return fmt.Errorf("usage: %v <name> <url>", cmd.Name)
+	}
+
+	currentUser := s.cfg.CurrentUserName
+	name := cmd.Args[0]
+	url := cmd.Args[1]
+
+	user, err := s.db.GetUser(context.Background(), currentUser)
+	if err != nil {
+		return fmt.Errorf("Current user not found: %w", err)
+	}
+
+	params := database.CreateFeedParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Name:      name,
+		Url:       url,
+		UserID:    user.ID,
+	}
+
+	feed, err := s.db.CreateFeed(context.Background(), params)
+	if err != nil {
+		return fmt.Errorf("Couldn't create feed: %w", err)
+	}
+
+	fmt.Printf("Feed created: %v (%v)\n", feed.Name, feed.Url)
+
+	return nil
+}
