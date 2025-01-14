@@ -11,4 +11,7 @@ VALUES ( $1, $2, $3, $4, $5, $6 )
 RETURNING *;
 
 -- name: GetFeedsList :many
-SELECT name, url, user_id FROM feeds ORDER BY name;
+SELECT feeds.name, feeds.url, users.name AS user_name FROM feeds
+INNER JOIN users
+ON feeds.user_id = users.id;
+
