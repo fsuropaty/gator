@@ -23,7 +23,7 @@ func handlerAddFeed(s *state, cmd command) error {
 		return fmt.Errorf("Current user not found: %w", err)
 	}
 
-	params := database.CreateFeedParams{
+	feedParams := database.CreateFeedParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -32,12 +32,26 @@ func handlerAddFeed(s *state, cmd command) error {
 		UserID:    user.ID,
 	}
 
-	feed, err := s.db.CreateFeed(context.Background(), params)
+	feed, err := s.db.CreateFeed(context.Background(), feedParams)
 	if err != nil {
 		return fmt.Errorf("Couldn't create feed: %w", err)
 	}
 
+	feedFollowParams := database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		FeedID:    feed.ID,
+		UserID:    user.ID,
+	}
+
+	feedFollow, err := s.db.CreateFeedFollow(context.Background(), feedFollowParams)
+	if err != nil {
+		return fmt.Errorf("Couldn't create feed follow record: %w", err)
+	}
+
 	fmt.Printf("Feed created: %v (%v)\n", feed.Name, feed.Url)
+	fmt.Printf("Feed has been added to follow record: %v", feedFollow.FeedName)
 
 	return nil
 }
