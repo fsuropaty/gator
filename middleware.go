@@ -18,7 +18,6 @@ func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) 
 			return fmt.Errorf("Current user not found: %w", err)
 		}
 
-		handler(s, c, user)
-		return nil
+		return handler(s, c, user)
 	}
 }
