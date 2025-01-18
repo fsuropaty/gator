@@ -9,19 +9,13 @@ import (
 	"github.com/google/uuid"
 )
 
-func handlerAddFeed(s *state, cmd command) error {
+func handlerAddFeed(s *state, cmd command, user database.User) error {
 	if len(cmd.Args) < 2 {
 		return fmt.Errorf("usage: %v <name> <url>", cmd.Name)
 	}
 
-	currentUser := s.cfg.CurrentUserName
 	name := cmd.Args[0]
 	url := cmd.Args[1]
-
-	user, err := s.db.GetUser(context.Background(), currentUser)
-	if err != nil {
-		return fmt.Errorf("Current user not found: %w", err)
-	}
 
 	feedParams := database.CreateFeedParams{
 		ID:        uuid.New(),
