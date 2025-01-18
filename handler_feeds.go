@@ -15,6 +15,7 @@ func handlerFeeds(s *state, cmd command) error {
 		fmt.Println(feed.Name)
 		fmt.Println(feed.Url)
 		fmt.Println(feed.UserName)
+		fmt.Println()
 	}
 
 	return nil

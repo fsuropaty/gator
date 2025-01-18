@@ -8,6 +8,7 @@ import (
 
 	"github.com/fsuropaty/gator-go/internal/database"
 	"github.com/fsuropaty/gator-go/rss"
+	"github.com/google/uuid"
 )
 
 func handlerAgg(s *state, cmd command) error {
@@ -24,7 +25,7 @@ func handlerAgg(s *state, cmd command) error {
 	fmt.Printf("Collecting feeds every %v\n", timeBetweenReqs)
 	ticker := time.NewTicker(timeBetweenReqs)
 
-	for ; ; <-ticker.C {
+	for range ticker.C {
 		if err := scrapeFeed(s); err != nil {
 			fmt.Printf("Failed to scrape the feed: %v\n", err)
 		}
@@ -59,17 +60,53 @@ func scrapeFeed(s *state) error {
 		return fmt.Errorf("Couldn't fetch feed: %w", err)
 	}
 
-	fmt.Printf("Feed Title: %s\n", rssFeed.Channel.Title)
-	fmt.Printf("Feed Link: %s\n", rssFeed.Channel.Link)
-	fmt.Printf("Feed Description: %s\n", rssFeed.Channel.Description)
+	for _, post := range rssFeed.Channel.Item {
+		pDate, err := parseDate(post.PubDate)
+		if err != nil {
+			return err
+		}
 
-	for _, item := range rssFeed.Channel.Item {
-		fmt.Println("-----------------------------------------------")
-		fmt.Printf("Article Title: %s\n", item.Title)
-		fmt.Printf("Article Link: %s\n", item.Link)
-		fmt.Printf("Article Description: %s\n", item.Description)
-		fmt.Printf("Published Date: %s\n\n", item.PubDate)
+		postParams := database.CreatePostParams{
+			ID:          uuid.New(),
+			Title:       post.Title,
+			Url:         post.Link,
+			Description: post.Description,
+			PublishedAt: pDate,
+			FeedID:      nextFeed.ID,
+		}
+
+		createdPost, err := s.db.CreatePost(context.Background(), postParams)
+		if err != nil {
+			return fmt.Errorf("Failed to create post: %w", err)
+		}
+
+		if createdPost.ID == uuid.Nil {
+			fmt.Printf("Skipped existing post: %s\n", post.Title)
+		} else {
+			fmt.Printf("Created new post: %s\n", post.Title)
+		}
+
 	}
 
+	fmt.Printf("Feed %s fetched successfully\n", nextFeed.Url)
+
 	return nil
+}
+
+func parseDate(dateStr string) (time.Time, error) {
+	layouts := []string{
+		time.RFC1123Z,          // "Mon, 02 Jan 2006 15:04:05 -0700"
+		time.RFC1123,           // "Mon, 02 Jan 2006 15:04:05 MST"
+		time.RFC822,            // "02 Jan 06 15:04 MST"
+		"2006-01-02T15:04:05Z", // ISO 8601
+		"Mon, 2 Jan 2006 15:04:05 -0700",
+	}
+
+	for _, layout := range layouts {
+		if t, err := time.Parse(layout, dateStr); err == nil {
+			return t, nil
+		}
+	}
+
+	return time.Time{}, fmt.Errorf("Couldn't parse date: %s", dateStr)
 }
