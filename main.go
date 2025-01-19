@@ -1,3 +1,4 @@
+//go:generate go build -o gator
 package main
 
 import (
@@ -16,12 +17,16 @@ type state struct {
 }
 
 func main() {
-	dbURL := "postgres://postgres:postgres@localhost:5432/gator"
-
 	cfg, err := config.Read()
 	if err != nil {
 		log.Fatal("Error reading config: ", err)
 	}
+
+	if cfg.DbURL == "" {
+		log.Fatal("Database URL not found in config file")
+	}
+
+	dbURL := cfg.DbURL
 
 	db, err := sql.Open("postgres", dbURL)
 	err = db.Ping()
