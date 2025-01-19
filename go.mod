@@ -1,4 +1,4 @@
-module github.com/fsuropaty/gator-go
+module github.com/fsuropaty/gator
 
 go 1.23.2
 

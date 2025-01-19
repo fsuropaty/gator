@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/fsuropaty/gator-go/internal/database"
+	"github.com/fsuropaty/gator/internal/database"
 )
 
 func handlerUnfollow(s *state, cmd command, user database.User) error {

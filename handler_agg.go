@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/fsuropaty/gator-go/internal/database"
-	"github.com/fsuropaty/gator-go/rss"
+	"github.com/fsuropaty/gator/internal/database"
+	"github.com/fsuropaty/gator/rss"
 	"github.com/google/uuid"
 )
 

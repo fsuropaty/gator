@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/fsuropaty/gator-go/internal/database"
+	"github.com/fsuropaty/gator/internal/database"
 	"github.com/google/uuid"
 )
 

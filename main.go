@@ -1,4 +1,3 @@
-//go:generate go build -o gator
 package main
 
 import (
@@ -6,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/fsuropaty/gator-go/internal/config"
-	"github.com/fsuropaty/gator-go/internal/database"
+	"github.com/fsuropaty/gator/internal/config"
+	"github.com/fsuropaty/gator/internal/database"
 	_ "github.com/lib/pq"
 )
 
